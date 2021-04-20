@@ -10,3 +10,6 @@ const deploy = async (network, secret, etherscanApiKey) => {
 module.exports = {
 	deploy
 };
+
+//contract address; 0x8f97C5A3FC849234C2b5fdB9fa81D26F7A565298
+//tx hash: 0xd708f88e3ffc347d66e985cdf85b75c2e77e78ab57f94987ab278d92c3ab39d0
