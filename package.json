@@ -9,7 +9,7 @@
   "author": "",
   "license": "ISC",
   "dependencies": {
-    "etherlime-lib": "^1.2.5",
-    "solc": "^0.8.3"
+    "@openzeppelin/contracts": "^3.4.0",
+    "etherlime-lib": "^1.2.5"
   }
 }
