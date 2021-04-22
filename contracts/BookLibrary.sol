@@ -50,14 +50,14 @@ contract BookLibrary {
       
         users[msg.sender][_name] = true;
         books[_name].userAddresses.push(msg.sender);
-        books[_name].numberOfCopies -= 1;
+        books[_name].numberOfCopies--;
     }
     
     
     function returnBook(bytes32 _name) public bookExists(_name){
         require(users[msg.sender][_name] == true, "you haven't borrowed a book with the given id");
         users[msg.sender][_name] = false;
-        books[_name].numberOfCopies += 1;
+        books[_name].numberOfCopies++;
     }
     
     function getUsersWhoBorrowedBook(bytes32 _name) public view bookExists(_name) returns (address[] memory){
