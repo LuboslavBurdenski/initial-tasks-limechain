@@ -10,17 +10,21 @@ const run = async function () {
 
     const booksLength = await (await bookLibraryContract.getAllBooks()).toString();
 
-    let arrOfBooks = [];
+    let arrOfBooks = {};
 
     if (booksLength > 0) {
         for (let i = 0; i < booksLength; i++) {
             const bookHash = await bookLibraryContract.bookIds(i);
             const [book, copies] = await bookLibraryContract.books(bookHash.toString());
-            await arrOfBooks.push([book, Number(copies.toString())]);
+            arrOfBooks[bookHash.toString()] = await [book, Number(copies.toString())];
         }
     }
-    console.log(`Available books: ${arrOfBooks}`)
-    const firstHashOfBookToWorkWith = await (await bookLibraryContract.bookIds(0)).toString();
+    const entries = Object.entries(arrOfBooks);
+    for (let i = 0; i < entries.length; i++) {
+    console.log(`Available books: ${entries[i][1][0]} - ${entries[i][1][1]}`)
+    }
+
+    const firstHashOfBookToWorkWith = entries[0][0].toString();
    
     const borrowingBook = await bookLibraryContract.borrowBook(firstHashOfBookToWorkWith);
     const borrowingBookReceipt = await borrowingBook.wait();
@@ -33,7 +37,9 @@ const run = async function () {
     const isRented = await bookLibraryContract.checkIfBookIsRented("0xcecdae0a4be9f587cfc6338a773943ec4359c412e5a7c43534badc1add55a421");
     console.log(`Rented: ${isRented}`)
 
-
+    const avalabilityOfBook = await bookLibraryContract.books(entries[0][0].toString());
+    entries[0][0] = avalabilityOfBook; //just to update the object, although it is pointless, just added a bit more abstraction :)
+    console.log(`Availability of the book: ${avalabilityOfBook[1]}`)
 
 }
 run()
