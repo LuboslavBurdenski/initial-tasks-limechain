@@ -6,9 +6,9 @@ const run = async function () {
     const wallet = new ethers.Wallet("1ea6a0ac245df86cc26df6d43b333db6e06315235bbf011a1f38a5709e102214", provider)
     const bookLibraryContract = new ethers.Contract("0x5818871A858f71cdBA3Af1B8ACf841fFc0eFf16d", BookLibrary.abi, wallet);
 
-    //await bookLibraryContract.addBook('book2', 10);
+    await bookLibraryContract.addBook('book2', 10);
 
-    const booksLength = await (await bookLibraryContract.getAllBooks()).toString();
+    const booksLength = await bookLibraryContract.getAllBooks();
 
     let arrOfBooks = {};
 
@@ -16,7 +16,7 @@ const run = async function () {
         for (let i = 0; i < booksLength; i++) {
             const bookHash = await bookLibraryContract.bookIds(i);
             const [book, copies] = await bookLibraryContract.books(bookHash.toString());
-            arrOfBooks[bookHash.toString()] = await [book, Number(copies.toString())];
+            arrOfBooks[bookHash.toString()] = [book, Number(copies.toString())];
         }
     }
     const entries = Object.entries(arrOfBooks);
@@ -29,6 +29,7 @@ const run = async function () {
     const borrowingBook = await bookLibraryContract.borrowBook(firstHashOfBookToWorkWith);
     const borrowingBookReceipt = await borrowingBook.wait();
     //console.log(borrowingBookReceipt)
+    console.log(`Rented: ${isRented}`)
 
     const returningBook = await bookLibraryContract.returnBook(firstHashOfBookToWorkWith);
     const returningBookReceipt = await returningBook.wait();
