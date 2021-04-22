@@ -3,6 +3,7 @@ pragma solidity >=0.7.0;
 pragma experimental ABIEncoderV2;
 import "@openzeppelin/contracts/access/Ownable.sol";
 
+
 contract BookLibrary {
     address owner;
     
@@ -33,9 +34,7 @@ contract BookLibrary {
     mapping(address => mapping(bytes32 => bool)) internal users;
        
     function addBook(string memory _name, uint _numberOfCopies) public onlyOwner {
-        bytes32 length = keccak256(abi.encodePacked(bookIds.length));
-        bytes32 hashedName = keccak256(abi.encodePacked(_name)); 
-      
+        bytes32 hashedName = keccak256(abi.encodePacked(_name));
         if(bytes(books[hashedName].name).length == 0){
             books[hashedName] = Book(_name, _numberOfCopies, new address[](0));
             bookIds.push(hashedName);
@@ -45,28 +44,32 @@ contract BookLibrary {
         
     }
   
-    function borrowBook(string memory _name) external bookExists(keccak256(abi.encodePacked(_name))){
-        bytes32 hashedName = keccak256(abi.encodePacked(_name));
-    
-        require(books[hashedName].numberOfCopies > 0, 'there is no copy available');
-        require(users[msg.sender][hashedName] != true, 'user has already borrowed the book');
+    function borrowBook(bytes32 _name) external bookExists(_name){
+        require(books[_name].numberOfCopies > 0, 'there is no copy available');
+        require(users[msg.sender][_name] != true, 'user has already borrowed the book');
       
-        users[msg.sender][hashedName] = true;
-        books[hashedName].userAddresses.push(msg.sender);
-        books[hashedName].numberOfCopies -= 1;
+        users[msg.sender][_name] = true;
+        books[_name].userAddresses.push(msg.sender);
+        books[_name].numberOfCopies -= 1;
     }
     
     
-    function returnBook(string  memory _name) public bookExists(keccak256(abi.encodePacked(_name))){
-        bytes32 hashedName = keccak256(abi.encodePacked(_name));
-        require(users[msg.sender][hashedName] == true, "you haven't borrowed a book with the given id");
-        users[msg.sender][hashedName] = false;
-        books[hashedName].numberOfCopies += 1;
+    function returnBook(bytes32 _name) public bookExists(_name){
+        require(users[msg.sender][_name] == true, "you haven't borrowed a book with the given id");
+        users[msg.sender][_name] = false;
+        books[_name].numberOfCopies += 1;
     }
     
-    function getUsersWhoBorrowedBook(string memory _name) public view bookExists(keccak256(abi.encodePacked(_name))) returns (address[] memory){
-        bytes32 hashedName = keccak256(abi.encodePacked(_name));
-        return books[hashedName].userAddresses;
+    function getUsersWhoBorrowedBook(bytes32 _name) public view bookExists(_name) returns (address[] memory){
+        return books[_name].userAddresses;
     } 
     
+    function checkIfBookIsRented(bytes32 _name) public view returns(bool){
+        return users[msg.sender][_name];
+    }
+    
+    function getAllBooks() public view returns(uint){
+         return bookIds.length;
+    }
+     
 }
