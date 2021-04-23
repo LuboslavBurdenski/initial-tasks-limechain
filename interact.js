@@ -7,10 +7,10 @@ const run = async function () {
     const bookLibraryContract = new ethers.Contract("0x5818871A858f71cdBA3Af1B8ACf841fFc0eFf16d", BookLibrary.abi, wallet);
 
     //adding new book
-    await bookLibraryContract.addBook('book2', 10);
-    
+    //await bookLibraryContract.addBook('book2', 10);
+
     const booksLength = await bookLibraryContract.getAllBooks();
-    
+
     let objOfBooks = {};
 
     if (booksLength > 0) {
@@ -27,16 +27,19 @@ const run = async function () {
     //getting the hash of the first book 
     const firstHashOfBookToWorkWith = entries[0][0].toString();
     //check if book is rented/borrowed
-    const isRented = await bookLibraryContract.checkIfBookIsRented(firstHashOfBookToWorkWith);
+    const isRented = async () => {return await bookLibraryContract.checkIfBookIsRented(firstHashOfBookToWorkWith) };
+
+    console.log(`Rented: ${await isRented()}`)
     //borrowing the book
-    console.log(`Rented: ${isRented}`)
-    const borrowingBook = await (await bookLibraryContract.borrowBook(firstHashOfBookToWorkWith)).wait();
+    const rentBook = await (await bookLibraryContract.borrowBook(firstHashOfBookToWorkWith)).wait();
+
+    console.log(`Rented: ${await isRented()}`)
     //returning the book and checking if the function had executed in the right way
-    console.log(`Rented: ${isRented}`)
     const returningBook = await (await bookLibraryContract.returnBook(firstHashOfBookToWorkWith)).wait();
-    console.log(`Rented: ${isRented}`)
+
+    console.log(`Rented: ${await isRented()}`)
     //checking the avalability of the book again
-    const avalabilityOfBook = await bookLibraryContract.books(firstHashOfBookToWorkWith);
+    const avalabilityOfBook = await (await bookLibraryContract.books(firstHashOfBookToWorkWith)).wait();
     console.log(`Availability of the book: ${avalabilityOfBook[1]}`)
 }
 run()
