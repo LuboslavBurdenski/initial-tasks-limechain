@@ -11,7 +11,7 @@ const run = async function () {
     
     const booksLength = await bookLibraryContract.getAllBooks();
     
-    let arrOfBooks = {};
+    let objOfBooks = {};
 
     if (booksLength > 0) {
         // making an object with property array in which we save the name and number of copies
@@ -19,11 +19,11 @@ const run = async function () {
             const bookHash = await bookLibraryContract.bookIds(i);
             const [book, copies] = await bookLibraryContract.books(bookHash);
             console.log(`Available books: ${book} - ${copies}`);
-            arrOfBooks[bookHash.toString()] = [book, Number(copies.toString())];
+            objOfBooks[bookHash.toString()] = [book, Number(copies.toString())];
         }
     }
     //getting the keys and values of our main object
-    const entries = Object.entries(arrOfBooks);
+    const entries = Object.entries(objOfBooks);
     //getting the hash of the first book 
     const firstHashOfBookToWorkWith = entries[0][0].toString();
     //check if book is rented/borrowed
