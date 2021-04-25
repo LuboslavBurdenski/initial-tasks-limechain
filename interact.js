@@ -27,7 +27,7 @@ const run = async function () {
     //getting the hash of the first book 
     const firstHashOfBookToWorkWith = entries[0][0].toString();
     //check if book is rented/borrowed
-    const isRented = async () => {return await bookLibraryContract.checkIfBookIsRented(firstHashOfBookToWorkWith) };
+    const isRented = async () => { return await bookLibraryContract.checkIfBookIsRented(firstHashOfBookToWorkWith) };
 
     console.log(`Rented: ${await isRented()}`)
     //borrowing the book
@@ -39,7 +39,10 @@ const run = async function () {
 
     console.log(`Rented: ${await isRented()}`)
     //checking the avalability of the book again
-    const avalabilityOfBook = await (await bookLibraryContract.books(firstHashOfBookToWorkWith)).wait();
+
+
+    const avalabilityOfBook = await bookLibraryContract.books(firstHashOfBookToWorkWith);
+
     console.log(`Availability of the book: ${avalabilityOfBook[1]}`)
 }
 run()
