@@ -1,18 +1,19 @@
 const { ethers } = require("ethers");
 const LIBRARY = require('./build/LIBRARY.json')
 const LIBWrapper = require('./build/LIBWrapper.json')
+
 const run = async function () {
     const providerURL = "http://localhost:8545";
     const walletPrivateKey = "0x7ab741b57e8d94dd7e1a29055646bafde7010f38a900f55bbd7647880faa6ee8";
     const wrapperContractAddress = "0x9eD274314f0fB37837346C425D3cF28d89ca9599";
     const provider = new ethers.providers.JsonRpcProvider(providerURL)
     const wallet = new ethers.Wallet(walletPrivateKey, provider)
-    const wrapperContract = new ethers.Contract(wrapperContractAddress, ETHWrapper.abi, wallet)
-    const wethAddress = await wrapperContract.WETHToken();
+    const wrapperContract = new ethers.Contract(wrapperContractAddress, LIBWrapper.abi, wallet)
+    const wethAddress = await wrapperContract.LIBToken();
 
     console.log(wethAddress);
 
-    const tokenContract = new ethers.Contract(wethAddress, WETH.abi, wallet)
+    const tokenContract = new ethers.Contract(wethAddress, LIBRARY.abi, wallet)
 
     const wrapValue = ethers.utils.parseEther("1")
 

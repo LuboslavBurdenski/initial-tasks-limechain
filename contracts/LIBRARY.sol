@@ -2,13 +2,14 @@
 pragma solidity >=0.7.0;
 pragma experimental ABIEncoderV2;
 import "@openzeppelin/contracts/access/Ownable.sol";
-import "@openzeppelin/contracts/presets/ERC20PresetMinterPauser.sol";
-import "./LIBWrapper.sol";
-contract LIBRARY is ERC20PresetMinterPauser {
-    address owner;
-    address LIBTokenAddress = address(LIBWrapper);
+import "./LIB.sol";
 
-    constructor(address LIBTokenAddress) ERC20PresetMinterPauser("Library Token", "LIB") {
+contract LIBRARY {
+    address owner;
+    LIB public LIBToken;
+
+    constructor(address LIBTokenAddress) public {
+        LIBToken = LIB(LIBTokenAddress);
         owner = msg.sender;
     }
 
@@ -48,18 +49,16 @@ contract LIBRARY is ERC20PresetMinterPauser {
     }
 
     function borrowBook(bytes32 _name) external bookExists(_name) {
-        require(books[_name].numberOfCopies > 0, "there is no copy available");
+        require(
+            LIBToken.allowance(msg.sender, address(this)) >= 1,
+            "renting not allowed"
+        );
+        require(books[_name].numberOfCopies >= 1, "there is no copy available");
         require(
             users[msg.sender][_name] != true,
             "user has already borrowed the book"
         );
-
-        uint amount = allowance(address(this), msg.sender);
-        require(
-           amount >= 1,
-            "user doesn't have enough tokens"
-        );
-        
+        LIBToken.transferFrom(msg.sender, address(this), 1);
         users[msg.sender][_name] = true;
         books[_name].userAddresses.push(msg.sender);
         books[_name].numberOfCopies--;
@@ -81,6 +80,17 @@ contract LIBRARY is ERC20PresetMinterPauser {
         returns (address[] memory)
     {
         return books[_name].userAddresses;
+    }
+
+    function unwrap(uint256 value) public onlyOwner {
+        require(value > 0, "We need to unwrap at least 1 wei");
+        LIBToken.transferFrom(msg.sender, address(this), value);
+        LIBToken.burn(value);
+        msg.sender.transfer(value);
+    }
+
+    function checkIfOwner(address _name) public view returns (bool) {
+        return owner == _name;
     }
 
     function checkIfBookIsRented(bytes32 _name) public view returns (bool) {

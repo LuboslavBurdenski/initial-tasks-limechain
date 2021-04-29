@@ -2,13 +2,13 @@
 pragma solidity >=0.7.0;
 pragma experimental ABIEncoderV2;
 
-import "./LIBRARY.sol";
+import "./LIB.sol";
 
 contract LIBWrapper {
-    LIBRARY public LIBToken;
+    LIB public LIBToken;
   
     constructor() public {
-        LIBToken = new LIBRARY();
+        LIBToken = new LIB();
     }
 
     function wrap() public payable {
