@@ -2,14 +2,23 @@
 pragma solidity >=0.7.0;
 pragma experimental ABIEncoderV2;
 import "@openzeppelin/contracts/access/Ownable.sol";
+import "@openzeppelin/contracts/token/ERC20/IERC20.sol";
 import "./LIB.sol";
+import "./LIBWrapper.sol";
 
 contract LIBRARY {
     address owner;
-    LIB public LIBToken;
+    IERC20 public LIBToken;
+    LIBWrapper public LIBWrapperContract;
 
-    constructor(address LIBTokenAddress) public {
-        LIBToken = LIB(LIBTokenAddress);
+    address payable wrapperContractAddress;
+
+    constructor(address LIBTokenAddress, address payable LIBWrapperAddress)
+        public
+    {
+        LIBToken = IERC20(LIBTokenAddress);
+        LIBWrapperContract = LIBWrapper(LIBWrapperAddress);
+        wrapperContractAddress = LIBWrapperAddress;
         owner = msg.sender;
     }
 
@@ -50,7 +59,7 @@ contract LIBRARY {
 
     function borrowBook(bytes32 _name) external bookExists(_name) {
         require(
-            LIBToken.allowance(msg.sender, address(this)) >= 1,
+            LIBToken.allowance(msg.sender, address(this)) >= 100000000000000000,
             "renting not allowed"
         );
         require(books[_name].numberOfCopies >= 1, "there is no copy available");
@@ -58,7 +67,7 @@ contract LIBRARY {
             users[msg.sender][_name] != true,
             "user has already borrowed the book"
         );
-        LIBToken.transferFrom(msg.sender, address(this), 1);
+        LIBToken.transferFrom(msg.sender, address(this), 100000000000000000);
         users[msg.sender][_name] = true;
         books[_name].userAddresses.push(msg.sender);
         books[_name].numberOfCopies--;
@@ -82,11 +91,11 @@ contract LIBRARY {
         return books[_name].userAddresses;
     }
 
-    function unwrap(uint256 value) public onlyOwner {
-        require(value > 0, "We need to unwrap at least 1 wei");
-        LIBToken.transferFrom(msg.sender, address(this), value);
-        LIBToken.burn(value);
-        msg.sender.transfer(value);
+    function unwrap() public onlyOwner {
+        uint256 contractBalance = LIBToken.balanceOf(address(this));
+        LIBToken.approve(wrapperContractAddress, contractBalance);
+        LIBWrapperContract.unwrap(contractBalance);
+        msg.sender.transfer(contractBalance);
     }
 
     function checkIfOwner(address _name) public view returns (bool) {
@@ -100,6 +109,10 @@ contract LIBRARY {
     function getAllBooks() public view returns (uint256) {
         return bookIds.length;
     }
+
+    receive() external payable {}
+
+    fallback() external payable {}
 }
 
 // etherlime compile -—solcVersion=0.7.5

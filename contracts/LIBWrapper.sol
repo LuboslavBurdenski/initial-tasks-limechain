@@ -6,7 +6,9 @@ import "./LIB.sol";
 
 contract LIBWrapper {
     LIB public LIBToken;
-  
+
+    event LogETHUnwrapped(address sender, uint256 amount);
+
     constructor() public {
         LIBToken = new LIB();
     }
@@ -21,6 +23,7 @@ contract LIBWrapper {
         LIBToken.transferFrom(msg.sender, address(this), value);
         LIBToken.burn(value);
         msg.sender.transfer(value);
+        emit LogETHUnwrapped(msg.sender, value);
     }
 
     receive() external payable {
